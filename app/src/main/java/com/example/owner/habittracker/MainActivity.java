@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDbHelper = new HabitDbHelper(this);
 
-        displayDatabaseInfo();
+        Cursor mCursor = readData();
+        displayDatabaseInfo(mCursor);
         insertHabit();
 
     }
@@ -44,14 +45,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        displayDatabaseInfo();
+        Cursor mCursor = readData();
+        displayDatabaseInfo(mCursor);
     }
 
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
+
+
+    // Read the database and RETURN a cursor per the Project Rubric and reviewer's notes.
+    private Cursor readData(){
         HabitDbHelper mDbHelper = new HabitDbHelper(this);
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -64,10 +65,6 @@ public class MainActivity extends AppCompatActivity {
                 + HabitEntry.COLUMN_STARTTIME + " TEXT, "
                 + HabitEntry.COLUMN_ENDTIME + " TEXT, "
                 + HabitEntry.COLUMN_DURATION + " INTEGER);";
-
-        Log.i("LOG2", "after string to define table");
-
-        Log.i("LOG: SQL_CREATE ",SQL_CREATE_HABITS_TABLE);
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_HABITS_TABLE);
@@ -82,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 HabitEntry.COLUMN_ENDTIME,
                 HabitEntry.COLUMN_DURATION};
 
-        Log.i("LOG1", "before string to define table with projection: " + projection);
-
         // Perform a query on the pets table
         Cursor cursor = db.query(
                 HabitEntry.TABLE_NAME,   // The table to query
@@ -93,6 +88,17 @@ public class MainActivity extends AppCompatActivity {
                 null,                  // Don't group the rows
                 null,                  // Don't filter by row groups
                 null);                   // The sort order
+
+        return cursor;
+    }
+
+
+    /**
+     * Revised helper method to display information in the onscreen TextView about the state of
+     * the habit tracker database.
+     */
+    private void displayDatabaseInfo(Cursor cursor) {
+
 
         TextView displayView = (TextView) findViewById(R.id.text_view_habit);
 
