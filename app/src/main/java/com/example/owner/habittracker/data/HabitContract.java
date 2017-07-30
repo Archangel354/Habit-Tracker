@@ -30,13 +30,13 @@ public final class HabitContract {
         public final static String COLUMN_COMMENT ="comment";
 
         // Start time of the activity performed by the user
-        public final static Time COLUMN_STARTTIME = Time.valueOf("startime");
+        public final static String COLUMN_STARTTIME = "startime";
 
         // End time of the activity performed by the user
-        public final static Time COLUMN_ENDTIME = Time.valueOf("endtime");
+        public final static String COLUMN_ENDTIME = "endtime";
 
         // Duration of the activity performed by the user
-        public final static Time COLUMN_DURATION = Time.valueOf("duration");
+        public final static String COLUMN_DURATION = "duration";
 
     }
 }

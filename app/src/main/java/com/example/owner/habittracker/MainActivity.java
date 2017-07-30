@@ -1,13 +1,20 @@
 package com.example.owner.habittracker;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.owner.habittracker.data.HabitContract;
 import com.example.owner.habittracker.data.HabitDbHelper;
+import com.example.owner.habittracker.data.HabitContract.HabitEntry;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +28,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mDbHelper = new HabitDbHelper(this);
+
+        // Create a String that contains the SQL statement to create the habits table
+        String SQL_CREATE_HABITS_TABLE =  "CREATE TABLE " + HabitEntry.TABLE_NAME + "("
+                + HabitEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + HabitEntry.COLUMN_HABIT_NAME + " TEXT, "
+                + HabitEntry.COLUMN_COMMENT + " TEXT, "
+                + HabitEntry.COLUMN_STARTTIME + " TEXT, "
+                + HabitEntry.COLUMN_ENDTIME + " TEXT, "
+                + HabitEntry.COLUMN_DURATION + " TEXT);";
+
+
+
+
         displayDatabaseInfo();
 
     }
@@ -28,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        displayDatabaseInfo();
+        //displayDatabaseInfo();
     }
 
     /**
@@ -36,22 +56,41 @@ public class MainActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
+        HabitDbHelper mDbHelper = new HabitDbHelper(this);
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Create a String that contains the SQL statement to create the habits table
+        String SQL_CREATE_HABITS_TABLE =  "CREATE TABLE IF NOT EXISTS " + HabitEntry.TABLE_NAME + "("
+                + HabitEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + HabitEntry.COLUMN_HABIT_NAME + " TEXT, "
+                + HabitEntry.COLUMN_COMMENT + " TEXT, "
+                + HabitEntry.COLUMN_STARTTIME + " TEXT, "
+                + HabitEntry.COLUMN_ENDTIME + " TEXT, "
+                + HabitEntry.COLUMN_DURATION + " TEXT);";
+
+        Log.i("LOG2", "after string to define table");
+
+        Log.i("LOG: SQL_CREATE ",SQL_CREATE_HABITS_TABLE);
+
+        // Execute the SQL statement
+        db.execSQL(SQL_CREATE_HABITS_TABLE);
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                HabitContract.HabitEntry._ID,
-                HabitContract.HabitEntry.COLUMN_HABIT_NAME,
-                HabitContract.HabitEntry.COLUMN_COMMENT,
-                HabitContract.HabitEntry.COLUMN_STARTTIME.toString(),
-                HabitContract.HabitEntry.COLUMN_ENDTIME.toString(),
-                HabitContract.HabitEntry.COLUMN_DURATION.toString()};
+                HabitEntry._ID,
+                HabitEntry.COLUMN_HABIT_NAME,
+                HabitEntry.COLUMN_COMMENT,
+                HabitEntry.COLUMN_STARTTIME,
+                HabitEntry.COLUMN_ENDTIME,
+                HabitEntry.COLUMN_DURATION};
+
+        Log.i("LOG1", "before string to define table with projection: " + projection);
 
         // Perform a query on the pets table
         Cursor cursor = db.query(
-                HabitContract.HabitEntry.TABLE_NAME,   // The table to query
+                HabitEntry.TABLE_NAME,   // The table to query
                 projection,            // The columns to return
                 null,                  // The columns for the WHERE clause
                 null,                  // The values for the WHERE clause
@@ -69,21 +108,21 @@ public class MainActivity extends AppCompatActivity {
             //
             // In the while loop below, iterate through the rows of the cursor and display
             // the information from each column in this order.
-            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
+            displayView.setText("The habits table contains " + cursor.getCount() + " habits.\n\n");
             displayView.append(HabitContract.HabitEntry._ID + " - " +
-                    HabitContract.HabitEntry.COLUMN_HABIT_NAME + " - " +
-                    HabitContract.HabitEntry.COLUMN_COMMENT + " - " +
-                    HabitContract.HabitEntry.COLUMN_STARTTIME + " - " +
-                    HabitContract.HabitEntry.COLUMN_ENDTIME + " - " +
-                    HabitContract.HabitEntry.COLUMN_DURATION + "\n");
+                    HabitEntry.COLUMN_HABIT_NAME + " - " +
+                    HabitEntry.COLUMN_COMMENT + " - " +
+                    HabitEntry.COLUMN_STARTTIME + " - " +
+                    HabitEntry.COLUMN_ENDTIME + " - " +
+                    HabitEntry.COLUMN_DURATION + "\n");
 
             // Figure out the index of each column
             int idColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry._ID);
             int nameColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_HABIT_NAME);
             int commentColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_COMMENT);
-            int startTimeColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_STARTTIME.toString());
-            int  endTimeColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_ENDTIME.toString());
-            int  durationColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_DURATION.toString());
+            int startTimeColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_STARTTIME);
+            int  endTimeColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_ENDTIME);
+            int  durationColumnIndex = cursor.getColumnIndex(HabitContract.HabitEntry.COLUMN_DURATION);
 
             // Iterate through all the returned rows in the cursor
             while (cursor.moveToNext()) {
@@ -92,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
                 int currentID = cursor.getInt(idColumnIndex);
                 String currentName = cursor.getString(nameColumnIndex);
                 String currentComment = cursor.getString(commentColumnIndex);
-                int currentStartTime = cursor.getInt(startTimeColumnIndex);
-                int currentEndTime = cursor.getInt(endTimeColumnIndex);
-                int currentDuration = cursor.getInt(durationColumnIndex);
+                String currentStartTime = cursor.getString(startTimeColumnIndex);
+                String currentEndTime = cursor.getString(endTimeColumnIndex);
+                String currentDuration = cursor.getString(durationColumnIndex);
                 // Display the values from each column of the current row in the cursor in the TextView
                 displayView.append(("\n" + currentID + " - " +
                         currentName + " - " +
