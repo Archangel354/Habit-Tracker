@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.owner.habittracker.data.HabitContract;
 import com.example.owner.habittracker.data.HabitDbHelper;
@@ -21,6 +22,12 @@ public class MainActivity extends AppCompatActivity {
     /** Database helper that will provide us access to the database */
     private HabitDbHelper mDbHelper;
 
+    // Hard-coded values for the table "habit"
+    String nameString = "Run daily marathon";
+    String commentString = "Ho Hum.. another marathon..";
+    String startTimeString = " 6:00 ";
+    String endTimeString = " 10:00 ";
+    int durationString = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,26 +36,15 @@ public class MainActivity extends AppCompatActivity {
 
         mDbHelper = new HabitDbHelper(this);
 
-        // Create a String that contains the SQL statement to create the habits table
-        String SQL_CREATE_HABITS_TABLE =  "CREATE TABLE " + HabitEntry.TABLE_NAME + "("
-                + HabitEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + HabitEntry.COLUMN_HABIT_NAME + " TEXT, "
-                + HabitEntry.COLUMN_COMMENT + " TEXT, "
-                + HabitEntry.COLUMN_STARTTIME + " TEXT, "
-                + HabitEntry.COLUMN_ENDTIME + " TEXT, "
-                + HabitEntry.COLUMN_DURATION + " TEXT);";
-
-
-
-
         displayDatabaseInfo();
+        insertHabit();
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //displayDatabaseInfo();
+        displayDatabaseInfo();
     }
 
     /**
@@ -67,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 + HabitEntry.COLUMN_COMMENT + " TEXT, "
                 + HabitEntry.COLUMN_STARTTIME + " TEXT, "
                 + HabitEntry.COLUMN_ENDTIME + " TEXT, "
-                + HabitEntry.COLUMN_DURATION + " TEXT);";
+                + HabitEntry.COLUMN_DURATION + " INTEGER);";
 
         Log.i("LOG2", "after string to define table");
 
@@ -103,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             // Create a header in the Text View that looks like this:
             //
-            // The pets table contains <number of rows in Cursor> pets.
-            // _id - name - breed - gender - weight
+            // The habits table contains <number of rows in Cursor> pets.
+            // _id - name - comment - start time - end time - duration
             //
             // In the while loop below, iterate through the rows of the cursor and display
             // the information from each column in this order.
@@ -133,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 String currentComment = cursor.getString(commentColumnIndex);
                 String currentStartTime = cursor.getString(startTimeColumnIndex);
                 String currentEndTime = cursor.getString(endTimeColumnIndex);
-                String currentDuration = cursor.getString(durationColumnIndex);
+                int currentDuration = cursor.getInt(durationColumnIndex);
                 // Display the values from each column of the current row in the cursor in the TextView
                 displayView.append(("\n" + currentID + " - " +
                         currentName + " - " +
@@ -146,6 +142,35 @@ public class MainActivity extends AppCompatActivity {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
             cursor.close();
+        }
+    }
+
+    private void insertHabit(){
+
+        // Create database helper
+        HabitDbHelper mDbHelper = new HabitDbHelper(this);
+
+        // Get the database in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a ContentValues object where column names are the keys, and habit strings are the values.
+        ContentValues values = new ContentValues();
+        values.put(HabitEntry.COLUMN_HABIT_NAME, nameString);
+        values.put(HabitEntry.COLUMN_COMMENT, commentString);
+        values.put(HabitEntry.COLUMN_STARTTIME, startTimeString);
+        values.put(HabitEntry.COLUMN_ENDTIME, endTimeString);
+        values.put(HabitEntry.COLUMN_DURATION, durationString);
+
+        // Insert a new row for habit in the database.  Return the ID of that row.
+        long newRowId = db.insert(HabitEntry.TABLE_NAME, null, values);
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (newRowId == -1) {
+            // If the row ID is -1, then there was an error with insertion.
+            Toast.makeText(this, "Error with saving habit", Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast with the row ID.
+            Toast.makeText(this, "Habit saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
         }
     }
 }

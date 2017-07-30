@@ -40,7 +40,7 @@ public class HabitDbHelper extends SQLiteOpenHelper{
                 + HabitEntry.COLUMN_COMMENT + " TEXT, "
                 + HabitEntry.COLUMN_STARTTIME + " TEXT, "
                 + HabitEntry.COLUMN_ENDTIME + " TEXT, "
-                + HabitEntry.COLUMN_DURATION + " TEXT);";
+                + HabitEntry.COLUMN_DURATION + " INTEGER);";
 
         Log.i("LOG2", "after string to define table");
 
